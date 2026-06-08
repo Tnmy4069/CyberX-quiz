@@ -20,6 +20,17 @@ interface SubmissionItem {
   fullscreenExitCount: number;
   status: string;
   submittedAt: string;
+  answers: Record<string, string[]>;
+}
+
+interface QuestionItem {
+  id: string;
+  quizId: string;
+  type: string;
+  question: string;
+  options: string[];
+  correctAnswer: string[];
+  marks: number;
 }
 
 interface QuizOption {
@@ -30,9 +41,10 @@ interface QuizOption {
 interface SubmissionsInspectorProps {
   submissions: SubmissionItem[];
   quizzes: QuizOption[];
+  questions: QuestionItem[];
 }
 
-export default function SubmissionsInspector({ submissions, quizzes }: SubmissionsInspectorProps) {
+export default function SubmissionsInspector({ submissions, quizzes, questions }: SubmissionsInspectorProps) {
   const [search, setSearch] = useState('');
   const [selectedQuiz, setSelectedQuiz] = useState('all');
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionItem | null>(null);
@@ -56,9 +68,8 @@ export default function SubmissionsInspector({ submissions, quizzes }: Submissio
       'Quiz Name',
       'Student Name',
       'Roll Number',
-      'Email',
-      'Mobile',
-      'Class/Department',
+      'Standard (Std)',
+      'Division',
       'Score',
       'Total Marks',
       'Tab Switch Count',
@@ -74,7 +85,6 @@ export default function SubmissionsInspector({ submissions, quizzes }: Submissio
       s.rollNumber,
       s.email,
       s.mobile,
-      s.class,
       s.score,
       s.totalMarks,
       s.tabSwitchCount,
@@ -106,9 +116,8 @@ export default function SubmissionsInspector({ submissions, quizzes }: Submissio
       'Quiz Name': s.quizName,
       'Student Name': s.participantName,
       'Roll Number': s.rollNumber,
-      Email: s.email,
-      Mobile: s.mobile,
-      'Class/Department': s.class,
+      'Standard (Std)': s.email,
+      'Division': s.mobile,
       Score: s.score,
       'Total Marks': s.totalMarks,
       'Tab Switch Count': s.tabSwitchCount,
@@ -224,7 +233,7 @@ export default function SubmissionsInspector({ submissions, quizzes }: Submissio
                       <div>
                         <span className="font-bold text-foreground block">{s.participantName}</span>
                         <span className="text-xs text-muted-foreground block font-mono">
-                          Roll: {s.rollNumber} | {s.class}
+                          Roll: {s.rollNumber} | Std: {s.email} | Div: {s.mobile}
                         </span>
                       </div>
                     </td>
@@ -292,62 +301,157 @@ export default function SubmissionsInspector({ submissions, quizzes }: Submissio
       {/* Modal Inspector Detail */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="max-w-lg w-full bg-card border border-border rounded-2xl p-6 shadow-2xl space-y-6">
-            <div className="flex justify-between items-start border-b border-border pb-4">
+          <div className="max-w-3xl w-full bg-card border border-border rounded-2xl p-6 shadow-2xl space-y-6 flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-start border-b border-border pb-4 shrink-0">
               <div className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-bold">Participant Metadata</h3>
+                <h3 className="text-lg font-bold">Submission Analysis & Metadata</h3>
               </div>
               <button
                 onClick={() => setSelectedSubmission(null)}
-                className="text-muted-foreground hover:text-foreground font-bold cursor-pointer"
+                className="text-muted-foreground hover:text-foreground font-bold cursor-pointer text-xl"
               >
                 &times;
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="col-span-2">
-                <span className="block text-xs font-semibold text-muted-foreground uppercase">Full Name</span>
-                <span className="font-bold text-base">{selectedSubmission.participantName}</span>
-              </div>
-              <div>
-                <span className="block text-xs font-semibold text-muted-foreground uppercase">Roll / ID</span>
-                <span className="font-semibold">{selectedSubmission.rollNumber}</span>
-              </div>
-              <div>
-                <span className="block text-xs font-semibold text-muted-foreground uppercase">Class / Dept</span>
-                <span className="font-semibold">{selectedSubmission.class}</span>
-              </div>
-              <div>
-                <span className="block text-xs font-semibold text-muted-foreground uppercase">Email Address</span>
-                <span className="font-semibold break-all">{selectedSubmission.email}</span>
-              </div>
-              <div>
-                <span className="block text-xs font-semibold text-muted-foreground uppercase">Mobile Number</span>
-                <span className="font-semibold font-mono">{selectedSubmission.mobile}</span>
-              </div>
-              <div className="col-span-2 bg-secondary/40 border border-border p-3.5 rounded-xl space-y-2">
-                <span className="block text-xs font-bold text-muted-foreground uppercase mb-1">Session Summary</span>
-                <div className="flex justify-between text-xs">
-                  <span>Graded Score:</span>
-                  <span className="font-bold text-primary">{selectedSubmission.score} / {selectedSubmission.totalMarks}</span>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 overflow-y-auto pr-1">
+              {/* Left Column: Student info and metrics */}
+              <div className="md:col-span-2 space-y-4">
+                <div className="bg-secondary/20 border border-border p-4 rounded-xl space-y-3">
+                  <span className="block text-xs font-bold text-muted-foreground uppercase">Student Profile</span>
+                  <div>
+                    <span className="block text-[10px] text-muted-foreground uppercase font-semibold">Name</span>
+                    <span className="font-bold text-sm text-foreground">{selectedSubmission.participantName}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-muted-foreground uppercase font-semibold">Roll / Student ID</span>
+                    <span className="font-semibold text-xs text-foreground font-mono">{selectedSubmission.rollNumber}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-muted-foreground uppercase font-semibold">Standard (Std)</span>
+                    <span className="font-semibold text-xs text-foreground">{selectedSubmission.email}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-muted-foreground uppercase font-semibold">Division</span>
+                    <span className="font-semibold text-xs text-foreground font-mono">{selectedSubmission.mobile}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span>Tab Violations:</span>
-                  <span className="font-semibold text-destructive">{selectedSubmission.tabSwitchCount} switches</span>
+
+                <div className="bg-secondary/40 border border-border p-4 rounded-xl space-y-2.5">
+                  <span className="block text-xs font-bold text-muted-foreground uppercase">Session Summary</span>
+                  <div className="flex justify-between text-xs">
+                    <span>Graded Score:</span>
+                    <span className="font-bold text-primary">{selectedSubmission.score} / {selectedSubmission.totalMarks}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span>Tab Violations:</span>
+                    <span className={`font-semibold ${selectedSubmission.tabSwitchCount > 0 ? 'text-destructive font-bold' : ''}`}>
+                      {selectedSubmission.tabSwitchCount} switches
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span>Fullscreen Violations:</span>
+                    <span className={`font-semibold ${selectedSubmission.fullscreenExitCount > 0 ? 'text-yellow-600 dark:text-yellow-400 font-bold' : ''}`}>
+                      {selectedSubmission.fullscreenExitCount} exits
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs pt-1 border-t border-border">
+                    <span>Status:</span>
+                    <span className="font-semibold uppercase">{selectedSubmission.status}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span>Fullscreen Violations:</span>
-                  <span className="font-semibold text-yellow-600 dark:text-yellow-400">{selectedSubmission.fullscreenExitCount} exits</span>
+              </div>
+
+              {/* Right Column: Question-wise breakdown */}
+              <div className="md:col-span-3 flex flex-col space-y-3">
+                <span className="block text-xs font-bold text-muted-foreground uppercase shrink-0">
+                  Question Breakdown
+                </span>
+
+                <div className="space-y-3 max-h-[50vh] md:max-h-[55vh] overflow-y-auto pr-1">
+                  {(() => {
+                    const submissionQuestions = questions.filter((q) => q.quizId === selectedSubmission.quizId);
+                    if (submissionQuestions.length === 0) {
+                      return <p className="text-xs text-muted-foreground italic py-4">No questions found for this quiz.</p>;
+                    }
+                    return submissionQuestions.map((question, index) => {
+                      const studentAnswers = selectedSubmission.answers?.[question.id] || [];
+                      const correctAnswers = question.correctAnswer || [];
+                      
+                      // Determine correctness
+                      let isCorrect = false;
+                      const isUnanswered = studentAnswers.length === 0 || studentAnswers[0]?.trim() === '';
+
+                      if (!isUnanswered) {
+                        if (question.type === 'mcq' || question.type === 'true_false') {
+                          isCorrect =
+                            studentAnswers.length === 1 &&
+                            correctAnswers.length === 1 &&
+                            studentAnswers[0] === correctAnswers[0];
+                        } else if (question.type === 'msq') {
+                          isCorrect =
+                            studentAnswers.length === correctAnswers.length &&
+                            studentAnswers.every((val) => correctAnswers.includes(val)) &&
+                            correctAnswers.every((val) => studentAnswers.includes(val));
+                        } else if (question.type === 'short_text') {
+                          const studentText = studentAnswers[0]?.trim().toLowerCase() || '';
+                          isCorrect = correctAnswers.some(
+                            (correctOpt) => correctOpt.trim().toLowerCase() === studentText
+                          );
+                        }
+                      }
+
+                      return (
+                        <div 
+                          key={question.id} 
+                          className={`border rounded-xl p-3 text-xs space-y-2 transition-all ${
+                            isUnanswered
+                              ? 'bg-secondary/20 border-border/80 text-muted-foreground'
+                              : isCorrect
+                              ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-950 dark:text-emerald-300'
+                              : 'bg-destructive/5 border-destructive/20 text-destructive-foreground dark:text-red-300'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2">
+                            <span className="font-bold">Q{index + 1}. {question.question}</span>
+                            <span className="font-mono font-semibold shrink-0">
+                              {isCorrect ? `${question.marks}/${question.marks}` : `0/${question.marks}`} pts
+                            </span>
+                          </div>
+
+                          <div className="space-y-1 text-[11px]">
+                            <p>
+                              <span className="font-semibold text-muted-foreground">Student Response: </span>
+                              {isUnanswered ? (
+                                <span className="italic text-muted-foreground text-[10px]">No Answer Provided</span>
+                              ) : (
+                                <span className="font-medium text-foreground">
+                                  {studentAnswers.join(', ')}
+                                </span>
+                              )}
+                            </p>
+                            {(!isCorrect || isUnanswered) && (
+                              <p>
+                                <span className="font-semibold text-muted-foreground">Correct Answer: </span>
+                                <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                                  {correctAnswers.join(', ')}
+                                </span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-2 border-t border-border shrink-0">
               <button
                 onClick={() => setSelectedSubmission(null)}
-                className="px-5 py-2 bg-secondary hover:bg-accent border border-border rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                className="px-5 py-2 bg-secondary hover:bg-accent border border-border rounded-xl text-sm font-semibold transition-colors cursor-pointer text-foreground"
               >
                 Close Inspector
               </button>

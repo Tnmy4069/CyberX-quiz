@@ -18,9 +18,8 @@ export default function StudentRegistration() {
 
   const [name, setName] = useState('');
   const [rollNumber, setRollNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [mobile, setMobile] = useState('');
-  const [studentClass, setStudentClass] = useState('');
+  const [standard, setStandard] = useState('');
+  const [division, setDivision] = useState('');
   const [registering, setRegistering] = useState(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
 
@@ -40,7 +39,7 @@ export default function StudentRegistration() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !rollNumber || !email || !mobile || !studentClass) {
+    if (!name || !rollNumber || !standard || !division) {
       setRegisterError('Please fill in all fields.');
       return;
     }
@@ -52,9 +51,9 @@ export default function StudentRegistration() {
       const res = await registerParticipant(quizInfo.quizId, {
         name,
         rollNumber,
-        email,
-        mobile,
-        class: studentClass,
+        email: standard,
+        mobile: division,
+        class: `${standard} - ${division}`,
       });
 
       // Save credentials in sessionStorage so the student session is cached
@@ -133,7 +132,7 @@ export default function StudentRegistration() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
+                  placeholder="Yash Patil"
                   className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
                   required
                 />
@@ -154,40 +153,28 @@ export default function StudentRegistration() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-semibold mb-2">Email Address</label>
+                <label className="block text-sm font-semibold mb-2">Standard (Std)</label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john@example.com"
-                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
+                  type="text"
+                  value={standard}
+                  onChange={(e) => setStandard(e.target.value)}
+                  placeholder="e.g. 10th"
+                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground font-mono"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-2">Mobile Number</label>
+                <label className="block text-sm font-semibold mb-2">Division</label>
                 <input
-                  type="tel"
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
-                  placeholder="+1 (555) 123-4567"
+                  type="text"
+                  value={division}
+                  onChange={(e) => setDivision(e.target.value)}
+                  placeholder="e.g. A"
                   className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-foreground"
                   required
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">Class / Department</label>
-              <input
-                type="text"
-                value={studentClass}
-                onChange={(e) => setStudentClass(e.target.value)}
-                placeholder="Computer Science & Engineering"
-                className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
-                required
-              />
             </div>
 
             {registerError && (

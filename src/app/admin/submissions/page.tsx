@@ -6,6 +6,7 @@ import { connectToDatabase } from '@/lib/db';
 import { Quiz } from '@/models/quiz';
 import { Submission } from '@/models/submission';
 import { Participant } from '@/models/participant';
+import { Question } from '@/models/question';
 import { redirect } from 'next/navigation';
 import SubmissionsInspector from './SubmissionsInspector';
 
@@ -31,6 +32,19 @@ export default async function SubmissionsPage() {
     .sort({ createdAt: -1 })
     .lean();
 
+  // Fetch all questions for these quizzes
+  const questions = await Question.find({ quizId: { $in: quizIds } }).sort({ createdAt: 1 }).lean();
+
+  const serializedQuestions = questions.map((q) => ({
+    id: q._id.toString(),
+    quizId: q.quizId.toString(),
+    type: q.type,
+    question: q.question,
+    options: q.options || [],
+    correctAnswer: q.correctAnswer || [],
+    marks: q.marks,
+  }));
+
   const serializedSubmissions = submissions.map((s) => {
     const participant = s.participantId as any;
     const quiz = s.quizId as any;
@@ -51,6 +65,7 @@ export default async function SubmissionsPage() {
       fullscreenExitCount: s.fullscreenExitCount || 0,
       status: s.status,
       submittedAt: s.submittedAt ? s.submittedAt.toISOString() : new Date().toISOString(),
+      answers: s.answers || {},
     };
   });
 
@@ -63,6 +78,7 @@ export default async function SubmissionsPage() {
     <SubmissionsInspector
       submissions={serializedSubmissions}
       quizzes={serializedQuizzes}
+      questions={serializedQuestions}
     />
   );
 }
