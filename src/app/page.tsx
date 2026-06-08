@@ -1,102 +1,113 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { validateAccessCode } from '@/app/actions';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { ShieldCheck, HelpCircle, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+
+export default function LandingPage() {
+  const [accessCode, setAccessCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accessCode.trim()) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const quizInfo = await validateAccessCode(accessCode);
+      router.push(`/quiz/${accessCode.toUpperCase().trim()}`);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred while validating the code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
+      {/* Header */}
+      <header className="flex justify-between items-center p-6 max-w-7xl w-full mx-auto">
+        <div className="flex items-center gap-2">
+          <img src="/logo.webp" alt="CyberX Logo" className="h-28 w-auto object-contain" />
+        </div>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/login"
+            className="text-sm font-medium hover:text-primary transition-colors text-muted-foreground"
+          >
+            Admin Panel
+          </Link>
+          <ThemeToggle />
+        </div>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Main Hero and Input */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 max-w-xl mx-auto w-full -mt-16">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl mb-3 text-balance">
+            Secure, Instant Assessments
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Enter your assessment credentials below to register and start your exam session.
+          </p>
+        </div>
+
+        <div className="w-full bg-card text-card-foreground border border-border rounded-2xl shadow-xl p-8 backdrop-blur-md">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="accessCode" className="block text-sm font-semibold mb-2">
+                Quiz Access Code
+              </label>
+              <input
+                id="accessCode"
+                type="text"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+                placeholder="e.g. QZ-2026-MATH"
+                className="w-full px-4 py-3 bg-secondary text-secondary-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-center font-mono text-lg tracking-wider placeholder:font-sans placeholder:text-sm uppercase"
+                disabled={loading}
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-xl text-center">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !accessCode.trim()}
+              className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Verifying Code...
+                </>
+              ) : (
+                'Access Quiz Room'
+              )}
+            </button>
+          </form>
+        </div>
+
+        <div className="mt-8 flex justify-center items-center gap-2 text-sm text-muted-foreground bg-secondary/50 px-4 py-2 rounded-full border border-border">
+          <HelpCircle className="h-4 w-4" />
+          <span>Requires fullscreen permission & tab-switch tracker.</span>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="py-6 border-t border-border text-center text-xs text-muted-foreground">
+        &copy; {new Date().getFullYear()} CyberX Assessments. All rights reserved.
       </footer>
     </div>
   );
