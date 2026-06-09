@@ -142,6 +142,7 @@ export async function createQuiz(data: {
   negativeMarking: boolean;
   shuffleQuestions: boolean;
   shuffleOptions: boolean;
+  showLeaderboard?: boolean;
 }) {
   const session = await checkAuth('admin');
   await connectToDatabase();
@@ -179,6 +180,7 @@ export async function updateQuiz(
     negativeMarking: boolean;
     shuffleQuestions: boolean;
     shuffleOptions: boolean;
+    showLeaderboard?: boolean;
   }
 ) {
   const session = await checkAuth('admin');
@@ -207,6 +209,7 @@ export async function updateQuiz(
   quiz.negativeMarking = data.negativeMarking;
   quiz.shuffleQuestions = data.shuffleQuestions;
   quiz.shuffleOptions = data.shuffleOptions;
+  quiz.showLeaderboard = data.showLeaderboard ?? true;
 
   await quiz.save();
   await logAction(`Updated quiz "${data.title}"`, session.user.email!);
@@ -632,7 +635,9 @@ export async function getSubmissionSuccessDetails(submissionId: string) {
 
   return {
     submissionId: submission.submissionId,
+    quizId: quiz?._id.toString() || '',
     quizName: quiz?.title || 'Unknown Quiz',
     submittedAt: submission.submittedAt.toISOString(),
+    showLeaderboard: quiz?.showLeaderboard !== false,
   };
 }

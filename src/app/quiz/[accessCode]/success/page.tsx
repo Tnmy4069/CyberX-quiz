@@ -127,12 +127,29 @@ function SuccessContent() {
             >
               Exit Room
             </Link>
-            <button
-              onClick={() => window.print()}
-              className="flex-1 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold shadow-lg shadow-primary/25 transition-all duration-200 cursor-pointer"
-            >
-              Print Receipt
-            </button>
+            {details.showLeaderboard ? (
+              <>
+                <button
+                  onClick={() => window.print()}
+                  className="flex-1 py-3 bg-secondary hover:bg-accent border border-border text-foreground rounded-xl font-semibold transition-all duration-200 cursor-pointer"
+                >
+                  Print Receipt
+                </button>
+                <Link
+                  href={`/leaderboard/${details.quizId}`}
+                  className="flex-1 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold shadow-lg shadow-primary/25 transition-all duration-200 text-center flex items-center justify-center"
+                >
+                  View Leaderboard
+                </Link>
+              </>
+            ) : (
+              <button
+                onClick={() => window.print()}
+                className="flex-1 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold shadow-lg shadow-primary/25 transition-all duration-200 cursor-pointer"
+              >
+                Print Receipt
+              </button>
+            )}
           </div>
 
         </div>

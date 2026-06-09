@@ -17,6 +17,7 @@ export default function NewQuizPage() {
   const [negativeMarking, setNegativeMarking] = useState(false);
   const [shuffleQuestions, setShuffleQuestions] = useState(false);
   const [shuffleOptions, setShuffleOptions] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function NewQuizPage() {
         negativeMarking,
         shuffleQuestions,
         shuffleOptions,
+        showLeaderboard,
       });
 
       router.push(`/admin/quizzes/${res.quizId}`);
@@ -155,7 +157,7 @@ export default function NewQuizPage() {
           <div className="border-t border-border pt-6 space-y-4">
             <h3 className="text-sm font-bold tracking-tight mb-2">Security & Layout Settings</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
                 <input
                   type="checkbox"
@@ -192,6 +194,19 @@ export default function NewQuizPage() {
                 <div className="text-xs">
                   <p className="font-bold">Shuffle Options</p>
                   <p className="text-muted-foreground mt-0.5">Randomizes options for MCQs and MSQs.</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
+                <input
+                  type="checkbox"
+                  checked={showLeaderboard}
+                  onChange={(e) => setShowLeaderboard(e.target.checked)}
+                  className="h-4.5 w-4.5 text-primary rounded accent-primary"
+                />
+                <div className="text-xs">
+                  <p className="font-bold">Show Leaderboard</p>
+                  <p className="text-muted-foreground mt-0.5">Display a public leaderboard for participants.</p>
                 </div>
               </label>
             </div>

@@ -45,6 +45,7 @@ export default async function EditQuizPage({ params }: { params: Promise<{ id: s
     active: quiz.active,
     shuffleQuestions: quiz.shuffleQuestions || false,
     shuffleOptions: quiz.shuffleOptions || false,
+    showLeaderboard: quiz.showLeaderboard !== false,
   };
 
   const serializedQuestions = questions.map((q) => ({

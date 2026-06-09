@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateQuiz, saveQuestions, toggleQuizActive } from '@/app/actions';
-import { ChevronLeft, Save, Plus, Trash2, HelpCircle, Layers, CheckCircle2, Loader2, Tag } from 'lucide-react';
+import { ChevronLeft, Save, Plus, Trash2, HelpCircle, Layers, CheckCircle2, Loader2, Tag, Trophy } from 'lucide-react';
 import Link from 'next/link';
 
 interface QuizDetails {
@@ -19,6 +19,7 @@ interface QuizDetails {
   active: boolean;
   shuffleQuestions: boolean;
   shuffleOptions: boolean;
+  showLeaderboard: boolean;
 }
 
 interface QuestionDetails {
@@ -51,6 +52,7 @@ export default function QuizEditor({ quiz, initialQuestions }: QuizEditorProps) 
   const [negativeMarking, setNegativeMarking] = useState(quiz.negativeMarking);
   const [shuffleQuestions, setShuffleQuestions] = useState(quiz.shuffleQuestions);
   const [shuffleOptions, setShuffleOptions] = useState(quiz.shuffleOptions);
+  const [showLeaderboard, setShowLeaderboard] = useState(quiz.showLeaderboard);
   const [isQuizActive, setIsQuizActive] = useState(quiz.active);
 
   // Questions State
@@ -82,6 +84,7 @@ export default function QuizEditor({ quiz, initialQuestions }: QuizEditorProps) 
         negativeMarking,
         shuffleQuestions,
         shuffleOptions,
+        showLeaderboard,
       });
       setSuccessMsg('Quiz settings updated successfully.');
       router.refresh();
@@ -261,6 +264,14 @@ export default function QuizEditor({ quiz, initialQuestions }: QuizEditorProps) 
 
         {/* HUD control buttons */}
         <div className="flex items-center gap-3 w-full md:w-auto">
+          <Link
+            href={`/leaderboard/${quiz.id}`}
+            target="_blank"
+            className="px-4 py-2 bg-secondary hover:bg-accent border border-border text-foreground rounded-xl text-sm font-semibold transition-all flex items-center gap-1.5"
+          >
+            <Trophy className="h-4 w-4 text-amber-500" />
+            Leaderboard
+          </Link>
           <button
             onClick={handleToggleStatus}
             disabled={togglingActive}
@@ -603,46 +614,59 @@ export default function QuizEditor({ quiz, initialQuestions }: QuizEditorProps) 
             <div className="border-t border-border pt-6 space-y-4">
               <h3 className="text-sm font-bold tracking-tight mb-2">Security & Layout Settings</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
-                  <input
-                    type="checkbox"
-                    checked={negativeMarking}
-                    onChange={(e) => setNegativeMarking(e.target.checked)}
-                    className="h-4.5 w-4.5 text-primary rounded accent-primary"
-                  />
-                  <div className="text-xs">
-                    <p className="font-bold">Negative Marking</p>
-                    <p className="text-muted-foreground mt-0.5">Subtracts 25% of marks for wrong answers.</p>
-                  </div>
-                </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
+                <input
+                  type="checkbox"
+                  checked={negativeMarking}
+                  onChange={(e) => setNegativeMarking(e.target.checked)}
+                  className="h-4.5 w-4.5 text-primary rounded accent-primary"
+                />
+                <div className="text-xs">
+                  <p className="font-bold">Negative Marking</p>
+                  <p className="text-muted-foreground mt-0.5">Subtracts 25% of marks for wrong answers.</p>
+                </div>
+              </label>
 
-                <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
-                  <input
-                    type="checkbox"
-                    checked={shuffleQuestions}
-                    onChange={(e) => setShuffleQuestions(e.target.checked)}
-                    className="h-4.5 w-4.5 text-primary rounded accent-primary"
-                  />
-                  <div className="text-xs">
-                    <p className="font-bold">Shuffle Questions</p>
-                    <p className="text-muted-foreground mt-0.5">Randomizes question sequence for each taker.</p>
-                  </div>
-                </label>
+              <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
+                <input
+                  type="checkbox"
+                  checked={shuffleQuestions}
+                  onChange={(e) => setShuffleQuestions(e.target.checked)}
+                  className="h-4.5 w-4.5 text-primary rounded accent-primary"
+                />
+                <div className="text-xs">
+                  <p className="font-bold">Shuffle Questions</p>
+                  <p className="text-muted-foreground mt-0.5">Randomizes question sequence for each taker.</p>
+                </div>
+              </label>
 
-                <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
-                  <input
-                    type="checkbox"
-                    checked={shuffleOptions}
-                    onChange={(e) => setShuffleOptions(e.target.checked)}
-                    className="h-4.5 w-4.5 text-primary rounded accent-primary"
-                  />
-                  <div className="text-xs">
-                    <p className="font-bold">Shuffle Options</p>
-                    <p className="text-muted-foreground mt-0.5">Randomizes options for MCQs and MSQs.</p>
-                  </div>
-                </label>
-              </div>
+              <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
+                <input
+                  type="checkbox"
+                  checked={shuffleOptions}
+                  onChange={(e) => setShuffleOptions(e.target.checked)}
+                  className="h-4.5 w-4.5 text-primary rounded accent-primary"
+                />
+                <div className="text-xs">
+                  <p className="font-bold">Shuffle Options</p>
+                  <p className="text-muted-foreground mt-0.5">Randomizes options for MCQs and MSQs.</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 border border-border bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 select-none">
+                <input
+                  type="checkbox"
+                  checked={showLeaderboard}
+                  onChange={(e) => setShowLeaderboard(e.target.checked)}
+                  className="h-4.5 w-4.5 text-primary rounded accent-primary"
+                />
+                <div className="text-xs">
+                  <p className="font-bold">Show Leaderboard</p>
+                  <p className="text-muted-foreground mt-0.5">Display a public leaderboard for participants.</p>
+                </div>
+              </label>
+            </div>
             </div>
 
             <div className="flex justify-end gap-3 border-t border-border pt-6 mt-6">

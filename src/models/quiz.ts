@@ -13,6 +13,7 @@ export interface IQuiz extends Document {
   createdBy: mongoose.Types.ObjectId | string | null; // ObjectId of Admin, or 'super-admin'
   shuffleQuestions: boolean;
   shuffleOptions: boolean;
+  showLeaderboard: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +32,7 @@ const QuizSchema = new Schema<IQuiz>(
     createdBy: { type: Schema.Types.Mixed, default: null }, // Can be Schema.Types.ObjectId or String
     shuffleQuestions: { type: Boolean, default: false },
     shuffleOptions: { type: Boolean, default: false },
+    showLeaderboard: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
