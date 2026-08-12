@@ -6,6 +6,7 @@ import { getSubmissionSuccessDetails } from '@/app/actions';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CheckCircle, ShieldCheck, Calendar, FileText, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -67,7 +68,7 @@ function SuccessContent() {
       {/* Header */}
       <header className="flex justify-between items-center p-6 max-w-7xl w-full mx-auto">
         <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="CyberX Logo" className="h-28 w-auto object-contain" />
+          <Image src="/logo.png" alt="CyberX Logo" width={180} height={112} className="h-28 w-auto object-contain" priority />
         </div>
         <ThemeToggle />
       </header>

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Key, Loader2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function SuperAdminLoginPage() {
   const [accessKey, setAccessKey] = useState('');
@@ -44,7 +45,7 @@ export default function SuperAdminLoginPage() {
       {/* Header */}
       <header className="flex justify-between items-center p-6 max-w-7xl w-full mx-auto">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="CyberX Logo" className="h-28 w-auto object-contain" />
+          <Image src="/logo.png" alt="CyberX Logo" width={180} height={112} className="h-28 w-auto object-contain" priority />
         </Link>
         <ThemeToggle />
       </header>

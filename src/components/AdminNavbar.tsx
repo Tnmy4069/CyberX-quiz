@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ShieldCheck, LayoutDashboard, FileText, ClipboardList, BarChart3, LogOut, Settings } from 'lucide-react';
+import Image from 'next/image';
 
 export function AdminNavbar() {
   const pathname = usePathname();
@@ -41,7 +42,7 @@ export function AdminNavbar() {
         <div className="flex justify-between h-28">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 shrink-0">
-              <img src="/logo.png" alt="CyberX Logo" className="h-24 w-auto object-contain" />
+              <Image src="/logo.png" alt="CyberX Logo" width={180} height={96} className="h-24 w-auto object-contain" priority />
             </Link>
 
             {/* Nav Links */}
