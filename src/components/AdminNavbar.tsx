@@ -41,7 +41,7 @@ export function AdminNavbar() {
         <div className="flex justify-between h-28">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 shrink-0">
-              <img src="/logo.webp" alt="CyberX Logo" className="h-24 w-auto object-contain" />
+              <img src="/logo.png" alt="CyberX Logo" className="h-24 w-auto object-contain" />
             </Link>
 
             {/* Nav Links */}
