@@ -34,7 +34,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="flex justify-between items-center p-6 max-w-7xl w-full mx-auto">
         <div className="flex items-center gap-2">
-          <img src="/logo.webp" alt="CyberX Logo" className="h-28 w-auto object-contain" />
+          <img src="/logo.png" alt="CyberX Logo" className="h-28 w-auto object-contain" />
         </div>
         <div className="flex items-center gap-4">
           <Link
