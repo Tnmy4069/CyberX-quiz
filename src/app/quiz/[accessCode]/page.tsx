@@ -154,24 +154,24 @@ export default function StudentRegistration() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-semibold mb-2">Standard (Std)</label>
+                <label className="block text-sm font-semibold mb-2">Year and Branch</label>
                 <input
                   type="text"
                   value={standard}
                   onChange={(e) => setStandard(e.target.value)}
-                  placeholder="e.g. 10th"
+                  placeholder="e.g. 4th Year CS"
                   className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground font-mono"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-2">Division</label>
+                <label className="block text-sm font-semibold mb-2">email</label>
                 <input
                   type="text"
                   value={division}
                   onChange={(e) => setDivision(e.target.value)}
-                  placeholder="e.g. A"
+                  placeholder="e.g. email@gmail.com"
                   className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-foreground"
                   required
                 />
