@@ -577,22 +577,23 @@ function QuizTakerContent() {
                 Previous
               </button>
 
-              <button
-                onClick={() => handleFinalSubmit(false)}
-                className="flex items-center gap-1.5 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow-md shadow-emerald-600/20 cursor-pointer transition-colors"
-              >
-                <CheckCircle className="h-4 w-4" />
-                Submit Quiz
-              </button>
-
-              <button
-                onClick={() => setCurrentIndex((idx) => Math.min(questions.length - 1, idx + 1))}
-                disabled={currentIndex === questions.length - 1}
-                className="flex items-center gap-1.5 px-4 py-2 border border-border hover:bg-accent rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Next
-                <ChevronRight className="h-4 w-4" />
-              </button>
+              {currentIndex === questions.length - 1 ? (
+                <button
+                  onClick={() => handleFinalSubmit(false)}
+                  className="flex items-center gap-1.5 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow-md shadow-emerald-600/20 cursor-pointer transition-colors"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  Submit Quiz
+                </button>
+              ) : (
+                <button
+                  onClick={() => setCurrentIndex((idx) => Math.min(questions.length - 1, idx + 1))}
+                  className="flex items-center gap-1.5 px-5 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
           </main>
