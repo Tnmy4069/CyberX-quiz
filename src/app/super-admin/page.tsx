@@ -9,6 +9,7 @@ import { Submission } from '@/models/submission';
 import { AuditLog } from '@/models/auditLog';
 import { redirect } from 'next/navigation';
 import { ShieldCheck, FileText, ClipboardList, Clock } from 'lucide-react';
+import { EnvVarsPanel, type EnvVarRow } from './EnvVarsPanel';
 
 export default async function SuperAdminPage() {
   await connectToDatabase();
@@ -26,6 +27,20 @@ export default async function SuperAdminPage() {
 
   // Fetch audit logs
   const auditLogs = await AuditLog.find().sort({ timestamp: -1 }).limit(10).lean();
+
+  const envKeys: { key: string; required: boolean }[] = [
+    { key: 'MONGODB_URI', required: true },
+    { key: 'NEXTAUTH_SECRET', required: true },
+    { key: 'NEXTAUTH_URL', required: false },
+    { key: 'SUPER_ADMIN_PASSWORD', required: true },
+    { key: 'NODE_ENV', required: false },
+  ];
+
+  const envVars: EnvVarRow[] = envKeys.map(({ key, required }) => ({
+    key,
+    required,
+    value: process.env[key] ?? null,
+  }));
 
   return (
     <div className="space-y-8 text-foreground">
@@ -90,6 +105,8 @@ export default async function SuperAdminPage() {
           </div>
         </div>
       </div>
+
+      <EnvVarsPanel vars={envVars} />
 
       {/* Audit Logs list */}
       <div className="bg-card text-card-foreground border border-border rounded-2xl shadow-sm p-6 space-y-4">
