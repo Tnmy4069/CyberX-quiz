@@ -25,7 +25,7 @@ export function EnvVarsPanel({ vars }: { vars: EnvVarRow[] }) {
   };
 
   return (
-    <div className="bg-card text-card-foreground border border-border rounded-2xl shadow-sm p-6 space-y-4">
+    <div className="bg-card text-card-foreground border border-border rounded-2xl shadow-sm p-4 sm:p-6 space-y-4">
       <div>
         <h3 className="text-base font-bold tracking-tight text-foreground">Environment Variables</h3>
         <p className="text-xs text-muted-foreground mt-1">

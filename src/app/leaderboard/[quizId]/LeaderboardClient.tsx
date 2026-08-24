@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { SiteFooter } from '@/components/BrandMark';
 import { Trophy, Search, Clock, Award, Users, ChevronLeft } from 'lucide-react';
 
 interface SubmissionData {
@@ -316,10 +317,7 @@ export default function LeaderboardClient({ quiz, submissions }: LeaderboardClie
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-6 border-t border-border/40 text-center text-xs text-muted-foreground">
-        &copy; {new Date().getFullYear()} CyberX Assessments. All rights reserved.
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

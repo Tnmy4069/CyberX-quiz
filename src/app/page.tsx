@@ -6,7 +6,7 @@ import { validateAccessCode } from '@/app/actions';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ShieldCheck, HelpCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { BrandMark, SiteFooter } from '@/components/BrandMark';
 
 export default function LandingPage() {
   const [accessCode, setAccessCode] = useState('');
@@ -33,10 +33,8 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Header */}
-      <header className="flex justify-between items-center p-6 max-w-7xl w-full mx-auto">
-        <div className="flex items-center gap-2">
-          <Image src="/logo.png" alt="CyberX Logo" width={180} height={112} className="h-28 w-auto object-contain" priority />
-        </div>
+      <header className="flex justify-between items-center p-4 sm:p-6 max-w-7xl w-full mx-auto gap-3">
+        <BrandMark size="lg" href={null} />
         <div className="flex items-center gap-4">
           <Link
             href="/login"
@@ -106,10 +104,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-6 border-t border-border text-center text-xs text-muted-foreground">
-        &copy; {new Date().getFullYear()} CyberX Assessments. All rights reserved.
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

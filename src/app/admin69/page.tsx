@@ -1,112 +1,143 @@
-'use client';
+export const dynamic = 'force-dynamic';
 
-import React, { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { Key, Loader2, ShieldCheck } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
+import { SuperAdminLogin } from './LoginForm';
+import { AdminNavbar } from '@/components/AdminNavbar';
+import { ControlCenter } from './ControlCenter';
+import { connectToDatabase } from '@/lib/db';
+import { User } from '@/models/user';
+import { Quiz } from '@/models/quiz';
+import { Submission } from '@/models/submission';
+import { Participant } from '@/models/participant';
+import { AuditLog } from '@/models/auditLog';
+import mongoose from 'mongoose';
+import type { EnvVarRow } from '@/app/super-admin/EnvVarsPanel';
+import { getPublicBranding } from '@/lib/branding';
 
-export default function SuperAdminLoginPage() {
-  const [accessKey, setAccessKey] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+export default async function Admin69Page() {
+  const session = await getServerSession(authOptions);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!accessKey.trim()) return;
+  if (!session || session.user.role !== 'super-admin') {
+    return <SuperAdminLogin />;
+  }
 
-    setLoading(true);
-    setError(null);
+  await connectToDatabase();
 
-    try {
-      const res = await signIn('credentials', {
-        redirect: false,
-        email: 'superadmin@platform.com',
-        password: accessKey,
-      });
+  const [
+    totalAdmins,
+    activeAdmins,
+    totalQuizzes,
+    activeQuizzes,
+    totalSubmissions,
+    inProgressSubmissions,
+    totalParticipants,
+    quizzes,
+    participants,
+    submissions,
+    auditLogs,
+  ] = await Promise.all([
+    User.countDocuments({ role: 'admin' }),
+    User.countDocuments({ role: 'admin', status: 'active' }),
+    Quiz.countDocuments(),
+    Quiz.countDocuments({ active: true }),
+    Submission.countDocuments(),
+    Submission.countDocuments({ status: 'in-progress' }),
+    Participant.countDocuments(),
+    Quiz.find().sort({ updatedAt: -1 }).limit(40).lean(),
+    Participant.find().sort({ createdAt: -1 }).limit(80).lean(),
+    Submission.find().sort({ submittedAt: -1 }).limit(40).lean(),
+    AuditLog.find().sort({ timestamp: -1 }).limit(50).lean(),
+  ]);
 
-      if (res?.error) {
-        setError('Invalid Super Admin Access Key.');
-        setLoading(false);
-      } else {
-        router.push('/super-admin');
-      }
-    } catch (err) {
-      setError('An error occurred during authentication.');
-      setLoading(false);
-    }
-  };
+  let mongoPingMs: number | null = null;
+  let mongoOk = false;
+  let dbName: string | null = null;
+  try {
+    const start = Date.now();
+    const ping = await mongoose.connection.db?.admin().ping();
+    mongoPingMs = Date.now() - start;
+    mongoOk = Boolean(ping);
+    dbName = mongoose.connection.name || null;
+  } catch {
+    mongoOk = false;
+  }
+
+  const envKeys: { key: string; required: boolean }[] = [
+    { key: 'MONGODB_URI', required: true },
+    { key: 'NEXTAUTH_SECRET', required: true },
+    { key: 'NEXTAUTH_URL', required: false },
+    { key: 'SUPER_ADMIN_PASSWORD', required: true },
+    { key: 'NODE_ENV', required: false },
+  ];
+
+  const envVars: EnvVarRow[] = envKeys.map(({ key, required }) => ({
+    key,
+    required,
+    value: process.env[key] ?? null,
+  }));
+
+  const branding = await getPublicBranding();
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
-      {/* Header */}
-      <header className="flex justify-between items-center p-6 max-w-7xl w-full mx-auto">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="CyberX Logo" width={180} height={112} className="h-28 w-auto object-contain" priority />
-        </Link>
-        <ThemeToggle />
-      </header>
-
-      {/* Main Container */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 max-w-md mx-auto w-full -mt-16">
-        <div className="w-full bg-card text-card-foreground border border-border rounded-2xl shadow-xl p-8 relative overflow-hidden">
-          
-          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-primary to-yellow-500" />
-
-          <div className="text-center mb-6">
-            <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4 border border-primary/20">
-              <Key className="h-6 w-6 animate-pulse text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Super Admin Entry</h1>
-            <p className="text-sm text-muted-foreground mt-1 text-balance">
-              Enter the master access key to unlock the dashboard.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold mb-1.5 text-foreground">Access Key</label>
-              <input
-                type="password"
-                value={accessKey}
-                onChange={(e) => setAccessKey(e.target.value)}
-                placeholder="Enter master key"
-                className="w-full px-4 py-2.5 bg-secondary text-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm text-center font-mono tracking-widest"
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-xl text-center">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || !accessKey.trim()}
-              className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Verifying Key...
-                </>
-              ) : (
-                'Unlock Dashboard'
-              )}
-            </button>
-          </form>
-        </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <AdminNavbar />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+        <ControlCenter
+          branding={branding}
+          stats={{
+            totalAdmins,
+            activeAdmins,
+            totalQuizzes,
+            activeQuizzes,
+            totalSubmissions,
+            inProgressSubmissions,
+            totalParticipants,
+          }}
+          envVars={envVars}
+          quizzes={quizzes.map((q) => ({
+            id: q._id.toString(),
+            title: q.title,
+            accessCode: q.accessCode,
+            active: q.active,
+            duration: q.duration,
+            startDate: new Date(q.startDate).toISOString(),
+            endDate: new Date(q.endDate).toISOString(),
+            totalMarks: q.totalMarks,
+          }))}
+          participants={participants.map((p) => ({
+            id: p._id.toString(),
+            name: p.name,
+            email: p.email,
+            rollNumber: p.rollNumber,
+            mobile: p.mobile,
+            className: p.class,
+            createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : new Date().toISOString(),
+          }))}
+          submissions={submissions.map((s) => ({
+            id: s._id.toString(),
+            submissionId: s.submissionId,
+            score: s.score,
+            status: s.status,
+            tabSwitchCount: s.tabSwitchCount,
+            submittedAt: new Date(s.submittedAt).toISOString(),
+          }))}
+          auditLogs={auditLogs.map((log) => ({
+            id: (log as { _id: { toString: () => string } })._id.toString(),
+            user: log.user,
+            action: log.action,
+            timestamp: new Date(log.timestamp).toISOString(),
+          }))}
+          system={{
+            nodeEnv: process.env.NODE_ENV || 'unknown',
+            nodeVersion: process.version,
+            mongoPingMs,
+            mongoOk,
+            dbName,
+            serverTime: new Date().toISOString(),
+          }}
+        />
       </main>
-
-      {/* Footer */}
-      <footer className="py-6 border-t border-border text-center text-xs text-muted-foreground">
-        &copy; {new Date().getFullYear()} CyberX Assessments. All rights reserved.
-      </footer>
     </div>
   );
 }

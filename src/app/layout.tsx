@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClientWrapper } from "@/components/ClientWrapper";
+import { getPublicBranding } from "@/lib/branding";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,24 +14,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "CyberX Quiz - Advanced Online Assessment Platform",
-  description: "Secure, responsive, and robust online examinations with advanced anti-cheat systems.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getPublicBranding();
+  return {
+    title: `${branding.appName} - Online Assessment Platform`,
+    description: "Secure, responsive, and robust online examinations with advanced anti-cheat systems.",
+    icons: { icon: branding.logoUrl },
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const branding = await getPublicBranding();
+
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ClientWrapper>
-          {children}
-        </ClientWrapper>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ClientWrapper branding={branding}>{children}</ClientWrapper>
       </body>
     </html>
   );

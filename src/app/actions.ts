@@ -9,6 +9,7 @@ import { Question } from '@/models/question';
 import { Participant } from '@/models/participant';
 import { Submission } from '@/models/submission';
 import { AuditLog } from '@/models/auditLog';
+import { AppSettings } from '@/models/settings';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import mongoose from 'mongoose';
@@ -234,6 +235,7 @@ export async function toggleQuizActive(id: string) {
   await logAction(`Toggled status of quiz "${quiz.title}" to ${quiz.active ? 'active' : 'inactive'}`, session.user.email!);
   revalidatePath(`/admin/quizzes/${id}`);
   revalidatePath('/admin/quizzes');
+  revalidatePath('/admin69');
 
   return { success: true, active: quiz.active };
 }
@@ -640,4 +642,53 @@ export async function getSubmissionSuccessDetails(submissionId: string) {
     submittedAt: submission.submittedAt.toISOString(),
     showLeaderboard: quiz?.showLeaderboard !== false,
   };
+}
+
+const LOGO_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'];
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+
+export async function updateAppBranding(formData: FormData) {
+  const session = await checkAuth('super-admin');
+  await connectToDatabase();
+
+  const appName = String(formData.get('appName') || '').trim();
+  if (!appName) {
+    throw new Error('App name is required.');
+  }
+  if (appName.length > 80) {
+    throw new Error('App name must be 80 characters or less.');
+  }
+
+  const resetLogo = String(formData.get('resetLogo') || '') === 'true';
+  const file = formData.get('logo');
+
+  let settings = await AppSettings.findOne({ key: 'app' });
+  if (!settings) {
+    settings = new AppSettings({ key: 'app', appName });
+  }
+
+  settings.appName = appName;
+
+  if (resetLogo) {
+    await settings.save();
+    await AppSettings.updateOne({ key: 'app' }, { $unset: { logoData: 1, logoContentType: 1 }, $set: { appName } });
+  } else if (file instanceof File && file.size > 0) {
+    if (file.size > MAX_LOGO_BYTES) {
+      throw new Error('Logo must be 2MB or smaller.');
+    }
+    if (!LOGO_TYPES.includes(file.type)) {
+      throw new Error('Logo must be PNG, JPG, WEBP, GIF, or SVG.');
+    }
+    const bytes = Buffer.from(await file.arrayBuffer());
+    settings.logoData = bytes;
+    settings.logoContentType = file.type;
+    await settings.save();
+  } else {
+    await settings.save();
+  }
+  await logAction(`Updated app branding to "${appName}"`, session.user.email!);
+  revalidatePath('/', 'layout');
+  revalidatePath('/admin69');
+
+  return { success: true };
 }

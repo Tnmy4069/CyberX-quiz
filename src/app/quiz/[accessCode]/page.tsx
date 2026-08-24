@@ -6,7 +6,7 @@ import { validateAccessCode, registerParticipant } from '@/app/actions';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ShieldCheck, UserCheck, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { BrandMark } from '@/components/BrandMark';
 
 export default function StudentRegistration() {
   const params = useParams();
@@ -100,10 +100,8 @@ export default function StudentRegistration() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Header */}
-      <header className="flex justify-between items-center p-6 max-w-7xl w-full mx-auto">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="CyberX Logo" width={180} height={112} className="h-28 w-auto object-contain" priority />
-        </Link>
+      <header className="flex justify-between items-center p-4 sm:p-6 max-w-7xl w-full mx-auto gap-3">
+        <BrandMark size="md" />
         <ThemeToggle />
       </header>
 
